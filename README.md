@@ -16,7 +16,7 @@ If you decide to use the developed structures in your research, please cite:
 
 	@mastersthesis{korn_nl2017,
 		author = {Nils Kornfeld},
-		title = {Optimierung eines neuronalen Netzes zur Objekterkennung unter Verwendung evolutionärer Algorithmen},
+		title = {Optimierung eines neuronalen Netzes zur Objekterkennung unter Verwendung evolution\"arer Algorithmen},
 		school = {Freie Universit\"at Berlin},
 		year = {2017}
 	}
