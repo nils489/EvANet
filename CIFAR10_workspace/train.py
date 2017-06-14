@@ -4,7 +4,7 @@ from cifar10_utils import get_cifar10
 import tensorflow as tf
 import numpy as np
 
-BATCH_SIZE = 1000
+BATCH_SIZE = 128
 IMAGE_SIZE = 32
 NUMBER_OF_CLASSES = 10
 
@@ -76,7 +76,7 @@ y_conv = tf.matmul(h_fc1_drop,W_fc2) + b_fc2
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
 
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
-#train_step = tf.train.GradientDescentOptimizer(1e-4).minimize(cross_entropy)
+#train_step = tf.train.GradientDescentOptimizer(0.1).minimize(cross_entropy)
 sess.run(tf.global_variables_initializer())
 
 correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
@@ -85,10 +85,10 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 for i in range(20000):
 	batch = create_batch(i,BATCH_SIZE,cifar10_dict['data'],cifar10_dict['labels'])
-	if i%100 == 0:
+	if i%20 == 0:
 		train_accuracy = accuracy.eval(feed_dict={x:batch[0],y_:batch[1], keep_prob:1.0})
 		print("step %d, training accuracy %g"%(i,train_accuracy))
 	train_step.run(feed_dict={x: batch[0], y_:batch[1], keep_prob:0.5})
 
 
-print("test accuracy %g"%accuracy.eval(feed_dict={x: cifar10_dict['data_test'][:,0:IMAGE_SIZE], y_:cifar10_dict['labels_test'],keep_prob:1.0}))
+print("test accuracy %g"%accuracy.eval(feed_dict={x: cifar10_dict['data_test'][0:500,0:IMAGE_SIZE*IMAGE_SIZE], y_:translate_labels(cifar10_dict['labels_test'][0:500]),keep_prob:1.0}))
