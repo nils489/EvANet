@@ -2,6 +2,9 @@
 Residual Neural Networks, optimized by using a genetic algorithm
 
 This repository contains some utility scripts and the implemented heterogeneous network structures from my master's thesis.
+You can find the thesis here: http://www.mi.fu-berlin.de/inf/groups/ag-ki/Theses/Completed-theses/Master_Diploma-theses/2017/Kornfeld/index.html
+
+To use more recent tensorflow code, please checkout the tensorflow branch of this repo.
 
 ### abstract
 In recent years, neural networks have been widely used as the method of choice for classification tasks in computer vision and image processing. The networks that currently provide the best results are very deep residual Convolutional Neural Networks. New network structures, based on the previously used topologies are developed each year, using different approaches.
