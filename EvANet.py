@@ -141,7 +141,7 @@ evanet = activation(evanet, activation='relu')
 evanet = avg_pool_2d(evanet, 3)
 evanet = fully_connected(evanet, 10, activation='softmax')
 
-sgd = SGD(learning_rate=0.1, lr_decay=0.1, decay_step=2500000)
+sgd = SGD(learning_rate=0.1, lr_decay=0.1, decay_step=16000)
 evanet = regression(evanet, optimizer=sgd, loss='categorical_crossentropy',
                     name='targets')
 
