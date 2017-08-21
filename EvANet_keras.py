@@ -1,12 +1,13 @@
 from keras.datasets import cifar10
 from keras.layers.convolutional import Conv2D
 from keras.layers.normalization import BatchNormalization
-from keras.layers.core import Activation, Dense
+from keras.layers.core import Activation, Dense, Flatten
 from keras.layers import Input
 from keras.layers.merge import Add, Concatenate
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
+from keras.utils import to_categorical
 
 
 def conv_norm_block(in_blob, width, filter_size):
@@ -89,10 +90,21 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
     tmpnet = Add()([in_blob, tmpnet])
     return tmpnet
 
+num_classes = 10
+num_epochs = 200
+batch_size = 128
+
 (X, Y), (test_x, test_y) = cifar10.load_data()
 
 #X = X.reshape([-1,32,32,3])
 #test_x = test_x.reshape([-1,32,32,3])
+X = X.astype('float32')
+text_x = test_x.astype('float32')
+#X /= 255
+#test_x /= 255
+
+Y = to_categorical(Y, num_classes)
+test_y = to_categorical(test_y, num_classes)
 
 datagen = ImageDataGenerator(featurewise_center=True,
                              featurewise_std_normalization = True,
@@ -136,11 +148,16 @@ evanet = BatchNormalization()(evanet)
 evanet = Activation('relu')(evanet)
 evanet = AveragePooling2D(pool_size=(3, 3), strides=(1,1),
                           padding='same')(evanet)
-evanet_out = Dense(10, activation='softmax')(evanet)
+
+evanet = Flatten()(evanet)
+evanet_out = Dense(num_classes, activation='softmax')(evanet)
 
 model = Model(inputs=a, outputs=evanet_out)
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['acc'])
-print(X.shape)
-model.fit_generator(datagen.flow(X,Y, batch_size=128),
-                    steps_per_epoch=(len(X)/128), epochs=200,
-                    validation_data=(test_x, test_y))
+print("X.shape: ", X.shape)
+print("Y.shape: ", Y.shape)
+print("test_x.shape: ", test_x.shape)
+print("test_y.shape: ", test_y.shape)
+model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
+                    steps_per_epoch=(len(X)//batch_size), epochs=num_epochs)
+                    #validation_data=(test_x, test_y))
