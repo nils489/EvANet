@@ -183,7 +183,7 @@ evanet = Flatten()(evanet)
 evanet_out = Dense(num_classes, activation='softmax')(evanet)
 
 model = Model(inputs=a, outputs=evanet_out)
-model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['acc'])
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['acc'])
 print("X.shape: ", X.shape)
 print("Y.shape: ", Y.shape)
 print("test_x.shape: ", test_x.shape)
