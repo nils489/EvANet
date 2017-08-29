@@ -189,5 +189,5 @@ print("Y.shape: ", Y.shape)
 print("test_x.shape: ", test_x.shape)
 print("test_y.shape: ", test_y.shape)
 model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
-                    steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
-                    validation_data=(test_x, test_y))
+                    steps_per_epoch=(len(X)//batch_size), epochs=num_epochs)
+model.evaluate(self, test_x, test_y, batch_size=32, verbose=1, sample_weight=None)
