@@ -85,7 +85,7 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
     poolnet = MaxPooling2D(pool_size=(3,3), strides=(1,1), padding='same')(tmpnet)
     poolnet = Conv2D(pool_width, 1, padding='same')(poolnet)
     poolnet = Activation('relu')(poolnet)
-    tmpnet = Concatenate(axis=3)([inc1net, inc3net, inc5net, poolnet])
+    tmpnet = Concatenate(axis=3)([tmpnet, inc1net, inc3net, inc5net, poolnet])
     tmpnet = Conv2D(out_width, 1, padding='same')(tmpnet)
     tmpnet = Add()([in_blob, tmpnet])
     return tmpnet
@@ -159,5 +159,5 @@ print("Y.shape: ", Y.shape)
 print("test_x.shape: ", test_x.shape)
 print("test_y.shape: ", test_y.shape)
 model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
-                    steps_per_epoch=(len(X)//batch_size), epochs=num_epochs)
-                    #validation_data=(test_x, test_y))
+                    steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
+                    validation_data=(test_x, test_y))
