@@ -85,7 +85,7 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
     poolnet = MaxPooling2D(pool_size=(3,3), strides=(1,1), padding='same')(tmpnet)
     poolnet = Conv2D(pool_width, 1, padding='same')(poolnet)
     poolnet = Activation('relu')(poolnet)
-    tmpnet = Concatenate(axis=3)([inc1net, inc3net, inc5net, poolnet])
+    tmpnet = Concatenate(axis=3)([tmpnet, inc1net, inc3net, inc5net, poolnet])
     tmpnet = Conv2D(out_width, 1, padding='same')(tmpnet)
     tmpnet = Add()([in_blob, tmpnet])
     return tmpnet
@@ -95,7 +95,7 @@ def inception_v3_block(in_blob, inc1_width, inc3_width, inc3_3_width,
     tmpnet = BatchNormalization()(in_blob)
     tmpnet = Activation('relu')(tmpnet)
     inc1net = Conv2D(inc1_width, 1, padding='same')(tmpnet)
-    inctnet = Activation('relu')(inc1net)
+    inc1net = Activation('relu')(inc1net)
     inc3net = Conv2D(inc3_width//2, 1, padding='same')(tmpnet)
     inc3net = Activation('relu')(inc3net)
     inc3net = Conv2D(inc3_width, 3, padding='same')(inc3net)
@@ -109,7 +109,7 @@ def inception_v3_block(in_blob, inc1_width, inc3_width, inc3_3_width,
     poolnet = MaxPooling2D(pool_size=(3,3), strides=(1,1), padding='same')(tmpnet)
     poolnet = Conv2D(pool_width, 1, padding='same')(poolnet)
     poolnet = Activation('relu')(poolnet)
-    tmpnet = Concatenate(axis=3)([inc1net, inc3net, inc3_3net, poolnet])
+    tmpnet = Concatenate(axis=3)([tmpnet, inc1net, inc3net, inc3_3net, poolnet])
     tmpnet = Conv2D(out_width, 1, padding='same')(tmpnet)
     tmpnet = Add()([in_blob, tmpnet])
     return tmpnet
