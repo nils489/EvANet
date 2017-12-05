@@ -7,7 +7,7 @@ num_classes = 10
 num_epochs  = 50
 batch_size  = 128
 
-(X, Y), (test_x, test_y) = tf.contrib.keras.datasets.cifar10.load_data()
+(X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
 X = X.astype('float32')
 test_x = test_x.astype('float32')
 
@@ -19,6 +19,12 @@ def conv_norm_block(data, n_filters, filter_size):
     tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
     return tf.nn.relu(tmptens)
 
+def res_block_2015(data, n_filters, filter_size):
+    tmptens = conv_norm_block(data, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
+    tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
+    tmptens = tf.add(data, tmptens)
+    return tf.nn.relu(tmptens)
 
 
 def evanet(data, n_filters, filter_size):
