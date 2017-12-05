@@ -178,9 +178,11 @@ def EvANet(in_data):
     evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
 
     net_out = tf.layers.dense(evanet, num_classes)
+    _activation_summary(net_out)
+
     return net_out
 
-# the following function is based on code from:
+# the following functions are based on code from:
 # https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
@@ -197,6 +199,8 @@ def EvANet(in_data):
 # limitations under the License.
 #
 # modified by Nils Kornfeld
+#
+#BEGIN APACHE LICENSED CODE
 def loss(logits, labels):
     labels = tf.cast(labels, tf.int32)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits, name='cross_entropy_per_example')
@@ -205,28 +209,34 @@ def loss(logits, labels):
 
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
-# the following function is based on code from:
-# https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
-# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# modified by Nils Kornfeld
+def _add_loss_summaries(total_loss):
+    """Add summaries for losses in CIFAR-10 model.
+
+    Generates moving average for all losses and associated summaries for
+    visualizing the performance of the network.
+
+    Args:
+        total_loss: Total loss from loss().
+    Returns:
+        loss_averages_op: op for generating moving averages of losses.
+    """
+    loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
+    losses = tf.get_collection('losses')
+    loss_averages_op = loss_averages.apply(losses + [total_loss])
+
+    for l in losses + [total_loss]:
+        tf.summary.scalar(l.op.name + ' (raw)', l)
+        tf.summary.scalar(l.op.name, loss_averages.average(l))
+
+    return loss_averages_op
+
 def train(total_loss, global_step):
     num_batches_per_epoch = num_examples_per_epoch_for_train/batch_size
     decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
 
     lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
+
+#END APACHE LICENSED CODE
 
 
 
