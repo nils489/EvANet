@@ -11,8 +11,8 @@ batch_size  = 128
 X = X.astype('float32')
 test_x = test_x.astype('float32')
 
-Y = tf.contrib.keras.utils.to_categorical(Y, num_classes)
-test_y = tf.contrib.keras.utils.to_categorical(test_y, num_classes)
+Y = tf.keras.utils.to_categorical(Y, num_classes)
+test_y = tf.keras.utils.to_categorical(test_y, num_classes)
 
 def conv_norm_block(data, n_filters, filter_size):
     tmptens = tf.layers.conv2d(data, n_filters, filter_size, padding="same")
@@ -26,6 +26,22 @@ def res_block_2015(data, n_filters, filter_size):
     tmptens = tf.add(data, tmptens)
     return tf.nn.relu(tmptens)
 
+def res_block_2016(data, n_filters, filter_size):
+    tmptens = tf.layers.batch_normalization(data, training=is_training)
+    tmptens = tf.nn.relu(tmptens)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
+    tmptens = tf.nn.relu(tmptens)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.add(data, tmptens)
+    return tmptens
+
+def no_relu(data, n_filters, filter_size):
+    tmptens = conv_norm_block(data, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
+    tmptens = tf.add(data, tmptens)
+    return tmptens
 
 def evanet(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
