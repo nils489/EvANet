@@ -90,13 +90,41 @@ def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool
     tmptens = tf.add(data, tmptens)
     return tmptens
 
-def evanet(data, n_filters, filter_size):
-    tmptens = conv_norm_block(data, n_filters, filter_size)
+evanet = conv_norm_block(data, 16, 3)
 
-    tmptens = tf.layers.average_pooling2d(tmptens, pool_size(3,3),
-                                          strides=(1,1), padding="same")
-    net_out = tf.layers.dense(tmptens, num_classes)
-    return net_out
+evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+evanet = res_block_2016(evanet, 16, 3)
+evanet = inception_v1_block(evanet, 8, 16, 8, 32, 16)
+evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+
+evanet = tf.layers.conv2d(evanet, 32, 1, strides=2, padding="same")
+
+evanet = res_block_2015(evanet, 32, 3)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+
+evanet = tf.layers.conv2d(evanet, 64, 1, strides=2, padding="same")
+
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+
+evanet = tf.layers.batch_normalization(evanet, training=is_training)
+evanet = tf.nn.relu(evanet)
+evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
+
+net_out = tf.layers.dense(evanet, num_classes)
 
 def train_evanet(X):
     with tf.Session() as sess:
