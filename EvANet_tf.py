@@ -58,7 +58,35 @@ def res_conv_block_2016(data, n_filters, filter_size):
 
 def no_act_block_2015(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
-    tmptens = tf.layers.conv2d(data, n_filters, filter_size, padding="same")
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
+    tmptens = tf.add(data, tmptens)
+    return tmptens
+
+def bn_after_add_block(data, n_filters, filter_size):
+    tmptens = conv_norm_block(data, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
+    tmptens = tf.add(data, tmptens)
+    tmptens = tf.layers.batch_normalization(data, training=is_training)
+    return tf.nn.relu(tmptens)
+
+def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool_n_filters, out_n_filters):
+    tmptens = tf.layers.batch_normalization(data, training=is_training)
+    tmptens = tf.nn.relu(tmptens)
+    inc1net = tf.layers.conv2d(tmptens, inc1_n_filters, 1, padding="same")
+    inc1net = tf.nn.relu(inc1net)
+    inc3net = tf.layers.conv2d(tmptens, inc3_n_filters//2, 1, padding="same")
+    inc3net = tf.nn.relu(inc3net)
+    inc3net = tn.layers.conv2d(inc3net, inc3_n_filters, 3, padding="same")
+    inc3net = tf.nn.relu(inc3net)
+    inc5net = tf.layers.conv2d(tmptens, inc5_n_filters//2, 1, padding="same")
+    inc5net = tf.nn.relu(inc5net)
+    inc5net = tf.layers.conv2d(inc5net, inc5_n_filters, 5, padding="same")
+    inc5net = tf.nn.relu(inc5net)
+    poolnet = tf.layers.MaxPooling2D(pool_size=(3,3), strides=(1,1), padding='same')(tmptens)
+    poolnet = tf.layers.conv2d(poolnet, pool_n_filters, 1, padding="same")
+    poolnet = tf.nn.relu(poolnet)
+    tmptens = tf.concat([tmptens, inc1net, inc3net, inc5net, poolnet], axis=3)
+    tmptens = tf.layers.conv2d(tmptens, out_n_filters, 1, padding="same")
     tmptens = tf.add(data, tmptens)
     return tmptens
 
