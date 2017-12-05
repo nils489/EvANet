@@ -1,11 +1,22 @@
 import tensorflow as tf
 
+import cifar10_input
+
 tf.logging.set_verbosity(tf.logging.INFO)
 
 
-num_classes = 10
-num_epochs  = 50
+image_size  = cifar10_input.IMAGE_SIZE
+num_classes = cifar10_input.NUM_CLASSES
+num_epochs  = 200
 batch_size  = 128
+num_examples_per_epoch_for_train = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
+num_examples_per_epoch_for_eval  = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+
+num_epochs_per_decay       = 50.0
+learning_rate_decay_factor = 0.1
+initial_learning_rate      = 0.1
+
+#data_url = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
 (X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
 X = X.astype('float32')
@@ -90,41 +101,43 @@ def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool
     tmptens = tf.add(data, tmptens)
     return tmptens
 
-evanet = conv_norm_block(data, 16, 3)
+def EvANet(in_data):
+    evanet = conv_norm_block(in_data, 16, 3)
 
-evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
-evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
-evanet = res_block_2016(evanet, 16, 3)
-evanet = inception_v1_block(evanet, 8, 16, 8, 32, 16)
-evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
-evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
-evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+    evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+    evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+    evanet = res_block_2016(evanet, 16, 3)
+    evanet = inception_v1_block(evanet, 8, 16, 8, 32, 16)
+    evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+    evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
+    evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
 
-evanet = tf.layers.conv2d(evanet, 32, 1, strides=2, padding="same")
+    evanet = tf.layers.conv2d(evanet, 32, 1, strides=2, padding="same")
 
-evanet = res_block_2015(evanet, 32, 3)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
-evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = res_block_2015(evanet, 32, 3)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
+    evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
 
-evanet = tf.layers.conv2d(evanet, 64, 1, strides=2, padding="same")
+    evanet = tf.layers.conv2d(evanet, 64, 1, strides=2, padding="same")
 
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
-evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
+    evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
 
-evanet = tf.layers.batch_normalization(evanet, training=is_training)
-evanet = tf.nn.relu(evanet)
-evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
+    evanet = tf.layers.batch_normalization(evanet, training=is_training)
+    evanet = tf.nn.relu(evanet)
+    evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
 
-net_out = tf.layers.dense(evanet, num_classes)
+    net_out = tf.layers.dense(evanet, num_classes)
+    return net_out
 
 def train_evanet(X):
     with tf.Session() as sess:
