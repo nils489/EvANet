@@ -54,7 +54,7 @@ def res_conv_block_2016(in_blob, width, filter_size):
     tmpnet = Add()([shortcut, tmpnet])
     return tmpnet
 
-def no_act_block_2015(in_blob, widht, filter_size):
+def no_act_block_2015(in_blob, width, filter_size):
     tmpnet = conv_norm_block(in_blob, width, filter_size)
     tmpnet = Conv2D(widht, filter_size, padding='same')(tmpnet)
     tmpnet = Add()([in_blob, tmpnet])
