@@ -29,17 +29,36 @@ def res_block_2015(data, n_filters, filter_size):
 def res_block_2016(data, n_filters, filter_size):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     tmptens = tf.nn.relu(tmptens)
-    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
     tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
     tmptens = tf.nn.relu(tmptens)
-    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
     tmptens = tf.add(data, tmptens)
     return tmptens
 
 def no_relu(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
-    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
     tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
+    tmptens = tf.add(data, tmptens)
+    return tmptens
+
+def res_conv_block_2016(data, n_filters, filter_size):
+    tmptens = tf.layers.batch_normalization(data, training=is_training)
+    tmptens = tf.nn.relu(tmptens)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
+    tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
+    tmptens = tf.nn.relu(tmptens)
+    tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
+    shortcut = tf.layers.batch_normalization(data, training=is_training)
+    shortcut = tf.nn.relu(shortcut)
+    shortcut = tf.layers.conv2d(shortcut, n_filters, filter_size, padding="same")
+    tmptens = tf.add(shortcut, tmptens)
+    return tmptens
+
+def no_act_block_2015(data, n_filters, filter_size):
+    tmptens = conv_norm_block(data, n_filters, filter_size)
+    tmptens = tf.layers.conv2d(data, n_filters, filter_size, padding="same")
     tmptens = tf.add(data, tmptens)
     return tmptens
 
