@@ -18,6 +18,50 @@ initial_learning_rate      = 0.1
 
 #data_url = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
+# the following function is based on code from:
+# https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
+# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# 
+# modified by Nils Kornfeld
+def distorted_inputs():
+    data_dir = os.path.join('cifar-10-batches-bin')
+    images, labels = cifar10_input.distorted_inputs(data_dir=data_dir, batch_size=batch_size)
+    return images, labels
+
+# the following function is based on code from:
+# https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
+# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# modified by Nils Kornfeld
+def inputs(eval_data):
+    data_dir = os.path.join('cifar-10-batches-bin')
+    images, labels = cifar10_input.inputs(eval_data=eval_data, data_dir=data_dir, batch_size=1)
+    return images, labels
+    
 (X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
 X = X.astype('float32')
 test_x = test_x.astype('float32')
