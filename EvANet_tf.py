@@ -18,7 +18,7 @@ initial_learning_rate      = 0.1
 
 #data_url = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
-# the following function is based on code from:
+# the following functions are based on code from:
 # https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
@@ -33,43 +33,38 @@ initial_learning_rate      = 0.1
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # modified by Nils Kornfeld
+#
+#
+#BEGIN APACHE LICENSED CODE
+def _activation_summary(x):
+    """Helper to create summaries for activations.
+
+    Creates a summary that provides a histogram of activations.
+    Creates a summary that measures the sparsity of activations.
+
+    Args:
+        x: Tensor
+    Returns:
+        nothing
+
+    """
+    tensor_name = x.op.name
+    tf.summary.histogram(tensor_name + '/activations', x)
+    tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zerof_fraction(x))
+
 def distorted_inputs():
     data_dir = os.path.join('cifar-10-batches-bin')
     images, labels = cifar10_input.distorted_inputs(data_dir=data_dir, batch_size=batch_size)
     return images, labels
 
-# the following function is based on code from:
-# https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
-# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# modified by Nils Kornfeld
 def inputs(eval_data):
     data_dir = os.path.join('cifar-10-batches-bin')
     images, labels = cifar10_input.inputs(eval_data=eval_data, data_dir=data_dir, batch_size=1)
     return images, labels
+#END APACHE LICENSED CODE
 
-
-    
-# (X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
-# X = X.astype('float32')
-# test_x = test_x.astype('float32')
-
-# Y = tf.keras.utils.to_categorical(Y, num_classes)
-# test_y = tf.keras.utils.to_categorical(test_y, num_classes)
 
 def conv_norm_block(data, n_filters, filter_size):
     tmptens = tf.layers.conv2d(data, n_filters, filter_size, padding="same")
@@ -207,9 +202,9 @@ def loss(logits, labels):
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits, name='cross_entropy_per_example')
     cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
     tf.add_to_collection('losses', cross_entropy_mean)
-    
+
     return tf.add_n(tf.get_collection('losses'), name='total_loss')
- 
+
 # the following function is based on code from:
 # https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
@@ -230,9 +225,9 @@ def loss(logits, labels):
 def train(total_loss, global_step):
     num_batches_per_epoch = num_examples_per_epoch_for_train/batch_size
     decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
-    
+
     lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
-    
+
 
 
 def train_evanet(X):
