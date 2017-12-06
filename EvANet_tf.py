@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 
 import cifar10_input
 
@@ -15,6 +16,8 @@ num_examples_per_epoch_for_eval  = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 num_epochs_per_decay       = 50.0
 learning_rate_decay_factor = 0.1
 initial_learning_rate      = 0.1
+is_training = True
+moving_average_decay       = 0.999
 
 #data_url = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
@@ -52,7 +55,7 @@ def _activation_summary(x):
     """
     tensor_name = x.op.name
     tf.summary.histogram(tensor_name + '/activations', x)
-    tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zerof_fraction(x))
+    tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zero_fraction(x))
 
 def distorted_inputs():
     data_dir = os.path.join('cifar-10-batches-bin')
@@ -128,14 +131,14 @@ def bn_after_add_block(data, n_filters, filter_size):
     return tf.nn.relu(tmptens)
 
 # inception v1 block (see GoogLeNet-Paper)
-def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool_n_filters, out_n_filters):
+def inception_v1_block(data, inc1_n_filters, inc3_n_filters, inc5_n_filters, pool_n_filters, out_n_filters):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     tmptens = tf.nn.relu(tmptens)
     inc1net = tf.layers.conv2d(tmptens, inc1_n_filters, 1, padding="same")
     inc1net = tf.nn.relu(inc1net)
     inc3net = tf.layers.conv2d(tmptens, inc3_n_filters//2, 1, padding="same")
     inc3net = tf.nn.relu(inc3net)
-    inc3net = tn.layers.conv2d(inc3net, inc3_n_filters, 3, padding="same")
+    inc3net = tf.layers.conv2d(inc3net, inc3_n_filters, 3, padding="same")
     inc3net = tf.nn.relu(inc3net)
     inc5net = tf.layers.conv2d(tmptens, inc5_n_filters//2, 1, padding="same")
     inc5net = tf.nn.relu(inc5net)
@@ -184,7 +187,7 @@ def EvANet(in_data):
     evanet = tf.layers.batch_normalization(evanet, training=is_training)
     evanet = tf.nn.relu(evanet)
     evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
-
+    evanet = tf.layers.Flatten()(evanet)
     net_out = tf.layers.dense(evanet, num_classes)
     _activation_summary(net_out)
 
@@ -238,29 +241,48 @@ def _add_loss_summaries(total_loss):
 
     return loss_averages_op
 
-def train(total_loss, global_step):
+def train_evanet(total_loss, global_step):
     num_batches_per_epoch = num_examples_per_epoch_for_train/batch_size
     decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
 
     lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
     #tf.summary.scalar('learning_rate', lr)
-    
+
     loss_averages_op = _add_loss_summaries(total_loss)
-    
+
     # compute gradients
     with tf.control_dependencies([loss_averages_op]):
         opt = tf.train.GradientDescentOptimizer(lr)
         grads = opt.compute_gradients(total_loss)
-        
+
     # apply gradient descent
     apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
-    
-    variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
+
+    variable_averages = tf.train.ExponentialMovingAverage(moving_average_decay, global_step)
     variable_averages_op = variable_averages.apply(tf.trainable_variables())
-    
+
     with tf.control_dependencies([apply_gradient_op, variable_averages_op]):
         train_op = tf.no_op(name='train')
-        
+
     return train_op
+
+def train():
+    with tf.Graph().as_default():
+        global_step = tf.train.get_or_create_global_step()
+
+        images, labels = distorted_inputs()
+
+        logits = EvANet(images)
+
+        train_loss = loss(logits, labels)
+
+        train_op = train_evanet(train_loss, global_step)
+
+
+def main(argv=None):
+    train()
+
+if __name__=='__main__':
+    tf.app.run()
 
 #END APACHE LICENSED CODE
