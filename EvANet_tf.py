@@ -4,7 +4,7 @@ import cifar10_input
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-
+# training parameters
 image_size  = cifar10_input.IMAGE_SIZE
 num_classes = cifar10_input.NUM_CLASSES
 num_epochs  = 200
@@ -65,12 +65,13 @@ def inputs(eval_data):
     return images, labels
 #END APACHE LICENSED CODE
 
-
+# convolution layer with batch normalization and ReLU activation
 def conv_norm_block(data, n_filters, filter_size):
     tmptens = tf.layers.conv2d(data, n_filters, filter_size, padding="same")
     tmptens = tf.layers.batch_normalization(tmptens, training=is_training)
     return tf.nn.relu(tmptens)
 
+# residual block, 2015 version
 def res_block_2015(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
     tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
@@ -78,6 +79,7 @@ def res_block_2015(data, n_filters, filter_size):
     tmptens = tf.add(data, tmptens)
     return tf.nn.relu(tmptens)
 
+# residual block, 2016 version, with preactivation
 def res_block_2016(data, n_filters, filter_size):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     tmptens = tf.nn.relu(tmptens)
@@ -88,6 +90,7 @@ def res_block_2016(data, n_filters, filter_size):
     tmptens = tf.add(data, tmptens)
     return tmptens
 
+# residual block, 2015, without last ReLU
 def no_relu(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
     tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
@@ -95,6 +98,7 @@ def no_relu(data, n_filters, filter_size):
     tmptens = tf.add(data, tmptens)
     return tmptens
 
+# gated residual block, 2016 version
 def res_conv_block_2016(data, n_filters, filter_size):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     tmptens = tf.nn.relu(tmptens)
@@ -108,12 +112,14 @@ def res_conv_block_2016(data, n_filters, filter_size):
     tmptens = tf.add(shortcut, tmptens)
     return tmptens
 
+# residual block, 2015, without last ReLU and without last batch normalization
 def no_act_block_2015(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
     tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
     tmptens = tf.add(data, tmptens)
     return tmptens
 
+# residual block, 2015, bn moved after addition
 def bn_after_add_block(data, n_filters, filter_size):
     tmptens = conv_norm_block(data, n_filters, filter_size)
     tmptens = tf.layers.conv2d(tmptens, n_filters, filter_size, padding="same")
@@ -121,6 +127,7 @@ def bn_after_add_block(data, n_filters, filter_size):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     return tf.nn.relu(tmptens)
 
+# inception v1 block (see GoogLeNet-Paper)
 def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool_n_filters, out_n_filters):
     tmptens = tf.layers.batch_normalization(data, training=is_training)
     tmptens = tf.nn.relu(tmptens)
@@ -142,6 +149,7 @@ def inception_v1_block(data, inc1_n_filters, inc3_n_filters, in5_n_filters, pool
     tmptens = tf.add(data, tmptens)
     return tmptens
 
+# EvANet
 def EvANet(in_data):
     evanet = conv_norm_block(in_data, 16, 3)
 
