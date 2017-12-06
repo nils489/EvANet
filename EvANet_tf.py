@@ -235,16 +235,24 @@ def train(total_loss, global_step):
     decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
 
     lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
+    #tf.summary.scalar('learning_rate', lr)
+    
+    loss_averages_op = _add_loss_summaries(total_loss)
+    
+    # compute gradients
+    with tf.control_dependencies([loss_averages_op]):
+        opt = tf.train.GradientDescentOptimizer(lr)
+        grads = opt.compute_gradients(total_loss)
+        
+    # apply gradient descent
+    apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
+    
+    variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
+    variable_averages_op = variable_averages.apply(tf.trainable_variables())
+    
+    with tf.control_dependencies([apply_gradient_op, variable_averages_op]):
+        train_op = tf.no_op(name='train')
+        
+    return train_op
 
 #END APACHE LICENSED CODE
-
-
-
-def train_evanet(X):
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-
-        for epoch in range(n_epochs):
-            epoch_loss = 0
-            for iters in range(int(X.shape[0]//batch_size)):
-                epoch_x = X[iters*batch_size:]
