@@ -105,8 +105,8 @@ datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=Tru
 
 valgen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
                                                 featurewise_std_normalization=True,
-                                                width_shift_range=0.25,
-                                                height_shift_range=0.25,
+                                                width_shift_range=0,
+                                                height_shift_range=0,
                                                 vertical_flip=False)
 valgen.fit(test_x)
 datagen.fit(X)
@@ -159,4 +159,4 @@ print("test_y.shape: ", test_y.shape)
 model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
                     steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
                     validation_data=valgen.flow(test_x, test_y),
-                                            validation_steps=len(test_y))
+                                            validation_steps=len(test_y)//10)
