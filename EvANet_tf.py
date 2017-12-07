@@ -1,3 +1,8 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import numpy as np
 import tensorflow as tf
 import os
 
@@ -153,8 +158,8 @@ def inception_v1_block(data, inc1_n_filters, inc3_n_filters, inc5_n_filters, poo
     return tmptens
 
 # EvANet
-def EvANet(in_data):
-    evanet = conv_norm_block(in_data, 16, 3)
+def EvANet(features, labels, mode):
+    evanet = conv_norm_block(features, 16, 3)
 
     evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
     evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
@@ -189,7 +194,6 @@ def EvANet(in_data):
     evanet = tf.layers.AveragePooling2D(pool_size=(3,3), strides=(1,1), padding="same")(evanet)
     evanet = tf.layers.Flatten()(evanet)
     net_out = tf.layers.dense(evanet, num_classes)
-    _activation_summary(net_out)
 
     return net_out
 
@@ -242,47 +246,79 @@ def _add_loss_summaries(total_loss):
     return loss_averages_op
 
 def train_evanet(total_loss, global_step):
-    num_batches_per_epoch = num_examples_per_epoch_for_train/batch_size
-    decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
+    #num_batches_per_epoch = num_examples_per_epoch_for_train/batch_size
+    #decay_steps = int(num_batches_per_epoch * num_epochs_per_decay)
 
-    lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
+    #lr = tf.train.exponential_decay(initial_learning_rate, global_step, decay_steps, learning_rate_decay_factor, staircase=True)
     #tf.summary.scalar('learning_rate', lr)
+    #print(lr)
 
-    loss_averages_op = _add_loss_summaries(total_loss)
+    #loss_averages_op = _add_loss_summaries(total_loss)
 
     # compute gradients
-    with tf.control_dependencies([loss_averages_op]):
-        opt = tf.train.GradientDescentOptimizer(lr)
-        grads = opt.compute_gradients(total_loss)
+    #with tf.control_dependencies([loss_averages_op]):
+    #    opt = tf.train.GradientDescentOptimizer(lr)
+    #    grads = opt.compute_gradients(total_loss)
 
     # apply gradient descent
-    apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
+    #apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
 
-    variable_averages = tf.train.ExponentialMovingAverage(moving_average_decay, global_step)
-    variable_averages_op = variable_averages.apply(tf.trainable_variables())
+    #variable_averages = tf.train.ExponentialMovingAverage(moving_average_decay, global_step)
+    #variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    with tf.control_dependencies([apply_gradient_op, variable_averages_op]):
-        train_op = tf.no_op(name='train')
+    #with tf.control_dependencies([apply_gradient_op, variable_averages_op]):
+    #    train_op = tf.no_op(name='train')
 
-    return train_op
+    #return train_op
+    mode = tf.estimator.ModeKeys.TRAIN
+    loss=loss(logits, labels)
+    lr = tf.train.exponential_decay(initial_learning_rate, global_step,
+                                    decay_steps, learning_rate_decay_factor,
+                                    staircase=True)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=lr)
+    train_op = optimizer.minimize(loss=loss,
+                                  global_step=tf.train.get_global_step())
+    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
 def train():
-    with tf.Graph().as_default():
-        global_step = tf.train.get_or_create_global_step()
+    #with tf.Session() as sess:
+    #    with tf.Graph().as_default():
+    #        global_step = tf.train.get_or_create_global_step()
 
-        images, labels = distorted_inputs()
+    #       images, labels = distorted_inputs()
 
-        logits = EvANet(images)
+    #        logits = EvANet(images)
 
-        train_loss = loss(logits, labels)
+     #       train_loss = loss(logits, labels)
 
-        train_op = train_evanet(train_loss, global_step)
+      #      train_op = train_evanet(train_loss, global_step)
+       #     sess.run(train_op)
+    images, labels = distorted_inputs()
+    cifar10_classifier = tf.estimator.Estimator(model_fn=EvANet,
+                                                model_dir="./ckpts")
+    tensors_to_log = {"logits": "softmax_tensor"}
+    logging_hook = tf.train.LoggingTensorHook( tensors=tensors_to_log,
+                                              every_n_iter=50)
+    print(images.shape)
+    images = tf.layers.Flatten()(images)
+    #sess = tf.Session()
+    #with sess.as_default():
+    #    images = np.reshape(images.eval(), [128, 1728])
+    #    print(images.shape)
+    #in_images = images
+    #print(in_images.shape)
+    train_input_fn = tf.estimator.inputs.numpy_input_fn( x={"x": images.eval()}, y=labels,
+                                                        batch_size=batch_size,
+                                                        num_epochs=num_epochs,
+                                                        shuffle=True)
+    cifar10_classifier.train( input_fn=train_input_fn, steps=20000,
+                             hooks=[logging_hook])
 
 
 def main(argv=None):
     train()
+#END APACHE LICENSED CODE
+
 
 if __name__=='__main__':
     tf.app.run()
-
-#END APACHE LICENSED CODE
