@@ -1,14 +1,3 @@
-#from keras.datasets import cifar10
-#from keras.layers.convolutional import Conv2D
-#from keras.layers.normalization import BatchNormalization
-#from keras.layers.core import Activation, Dense, Flatten
-#from keras.layers import Input
-#from keras.layers.merge import Add, Concatenate
-#from keras.layers.pooling import MaxPooling2D, AveragePooling2D
-#from keras.preprocessing.image import ImageDataGenerator
-#from keras.models import Model
-#from keras.utils import to_categorical
-
 import tensorflow as tf
 
 def conv_norm_block(in_blob, width, filter_size):
