@@ -90,8 +90,8 @@ batch_size = 128
 
 #X = X.reshape([-1,32,32,3])
 #test_x = test_x.reshape([-1,32,32,3])
-X = X.astype('float32')
-text_x = test_x.astype('float32')
+#X = X.astype('float32')
+#text_x = test_x.astype('float32')
 #X /= 255
 #test_x /= 255
 
@@ -103,6 +103,12 @@ datagen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=Tru
                              width_shift_range=0.25, height_shift_range=0.25,
                              vertical_flip=True)
 
+valgen = tf.keras.preprocessing.image.ImageDataGenerator(featurewise_center=True,
+                                                featurewise_std_normalization=True,
+                                                width_shift_range=0.25,
+                                                height_shift_range=0.25,
+                                                vertical_flip=False)
+valgen.fit(test_x)
 datagen.fit(X)
 a = tf.keras.Input(shape=(32,32,3))
 
@@ -152,4 +158,5 @@ print("test_x.shape: ", test_x.shape)
 print("test_y.shape: ", test_y.shape)
 model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
                     steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
-                    validation_data=(test_x, test_y))
+                    validation_data=valgen.flow(test_x, test_y),
+                                            validation_steps=len(test_y))
