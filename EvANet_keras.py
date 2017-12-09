@@ -150,8 +150,10 @@ evanet = tf.keras.layers.AveragePooling2D(pool_size=(3, 3), strides=(1,1),
 evanet = tf.keras.layers.Flatten()(evanet)
 evanet_out = tf.keras.layers.Dense(num_classes, activation='softmax')(evanet)
 
+sgd = tf.keras.optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+
 model = tf.keras.models.Model(inputs=a, outputs=evanet_out)
-model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['acc'])
+model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['acc'])
 print("X.shape: ", X.shape)
 print("Y.shape: ", Y.shape)
 print("test_x.shape: ", test_x.shape)
