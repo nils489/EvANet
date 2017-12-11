@@ -83,7 +83,7 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
     return tmpnet
 
 num_classes = 10
-num_epochs = 200
+num_epochs = 500
 batch_size = 128
 
 (X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
@@ -161,4 +161,5 @@ print("test_y.shape: ", test_y.shape)
 model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
                     steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
                     validation_data=valgen.flow(test_x, test_y),
-                                            validation_steps=len(test_y)//10)
+                                            validation_steps=len(test_y))
+model.save("/PATH/TO/YOUR/MODELS/EvANet_model_"+num_epochs+"epochs.h5")
