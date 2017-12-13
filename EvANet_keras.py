@@ -3,14 +3,14 @@ import tensorflow as tf
 def conv_norm_block(in_blob, width, filter_size):
     tmpnet = tf.keras.layers.Conv2D(width, filter_size,
                                     padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(in_blob)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(in_blob)
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     return tf.keras.layers.Activation('relu')(tmpnet)
 
 def res_block_2015(in_blob, width, filter_size):
     tmpnet = conv_norm_block(in_blob, width, filter_size)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
@@ -20,18 +20,18 @@ def res_block_2016(in_blob, width, filter_size):
     tmpnet = tf.keras.layers.BatchNormalization()(in_blob)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     return tmpnet
 
 def no_relu(in_blob, width, filter_size):
     tmpnet = conv_norm_block(in_blob, width, filter_size)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     return tmpnet
@@ -40,29 +40,29 @@ def res_conv_block_2016(in_blob, width, filter_size):
     tmpnet = tf.keras.layers.BatchNormalization()(in_blob)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
     tmpnet = tf.keras.layers.Conv2D(widht, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     shortcut = tf.keras.layers.BatchNormalization()(in_blob)
     shortcut = tf.keras.layers.Activation('relu')(shortcut)
     shortcut = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                      kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(shortcut)
+                                      kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(shortcut)
     tmpnet = tf.keras.layers.Add()([shortcut, tmpnet])
     return tmpnet
 
 def no_act_block_2015(in_blob, width, filter_size):
     tmpnet = conv_norm_block(in_blob, width, filter_size)
     tmpnet = tf.keras.layers.Conv2D(widht, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     return tmpnet
 
 def bn_after_add_block(in_blob, width, filter_size):
     tmpnet = conv_norm_block(in_blob, width, filter_size)
     tmpnet = tf.keras.layers.Conv2D(width, filter_size, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     tmpnet = tf.keras.layers.BatchNormalization()(tmpnet)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
@@ -73,29 +73,29 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
     tmpnet = tf.keras.layers.BatchNormalization()(in_blob)
     tmpnet = tf.keras.layers.Activation('relu')(tmpnet)
     inc1net = tf.keras.layers.Conv2D(inc1_width, 1, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     inc1net = tf.keras.layers.Activation('relu')(inc1net)
     inc3net = tf.keras.layers.Conv2D(inc3_width//2, 1, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     inc3net = tf.keras.layers.Activation('relu')(inc3net)
     inc3net = tf.keras.layers.Conv2D(inc3_width, 3, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(inc3net)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(inc3net)
     inc3net = tf.keras.layers.Activation('relu')(inc3net)
     inc5net = tf.keras.layers.Conv2D(inc5_width//2, 1, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     inc5net = tf.keras.layers.Activation('relu')(inc5net)
     inc5net = tf.keras.layers.Conv2D(inc5_width, 5, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(inc5net)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(inc5net)
     inc5net = tf.keras.layers.Activation('relu')(inc5net)
     poolnet = tf.keras.layers.MaxPooling2D(pool_size=(3,3), strides=(1,1),
                                            padding='same')(tmpnet)
     poolnet = tf.keras.layers.Conv2D(pool_width, 1, padding='same',
-                                     kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(poolnet)
+                                     kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(poolnet)
     poolnet = tf.keras.layers.Activation('relu')(poolnet)
     tmpnet = tf.keras.layers.Concatenate(axis=3)([tmpnet, inc1net, inc3net,
                                                   inc5net, poolnet])
     tmpnet = tf.keras.layers.Conv2D(out_width, 1, padding='same',
-                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(tmpnet)
+                                    kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(tmpnet)
     tmpnet = tf.keras.layers.Add()([in_blob, tmpnet])
     return tmpnet
 
@@ -141,7 +141,7 @@ evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
 evanet = inception_v1_block(evanet, 8, 16, 32, 8, 16)
 
 evanet = tf.keras.layers.Conv2D(32, 1, strides=2, padding='same',
-                                kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(evanet)
+                                kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(evanet)
 
 evanet = res_block_2015(evanet, 32, 3)
 evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
@@ -152,7 +152,7 @@ evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
 evanet = inception_v1_block(evanet, 16, 32, 64, 16, 32)
 
 evanet = tf.keras.layers.Conv2D(64, 1, strides=2, padding='same',
-                                kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(evanet)
+                                kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(evanet)
 
 evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
 evanet = inception_v1_block(evanet, 32, 64, 128, 32, 64)
@@ -169,7 +169,7 @@ evanet = tf.keras.layers.AveragePooling2D(pool_size=(3, 3), strides=(1,1),
 
 evanet = tf.keras.layers.Flatten()(evanet)
 evanet_out = tf.keras.layers.Dense(num_classes, activation='softmax',
-                                   kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(evanet)
+                                   kernel_regularizer=tf.keras.regularizers.l1(weight_reg))(evanet)
 
 sgd = tf.keras.optimizers.SGD(lr=0.001, decay=0.0, momentum=0.9, nesterov=False)
 
