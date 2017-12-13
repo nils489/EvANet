@@ -102,7 +102,7 @@ def inception_v1_block(in_blob, inc1_width, inc3_width, inc5_width, pool_width,
 num_classes = 10
 num_epochs = 500
 batch_size = 128
-weight_reg = 0.0009
+weight_reg = 0.0001
 
 (X, Y), (test_x, test_y) = tf.keras.datasets.cifar10.load_data()
 
@@ -171,7 +171,7 @@ evanet = tf.keras.layers.Flatten()(evanet)
 evanet_out = tf.keras.layers.Dense(num_classes, activation='softmax',
                                    kernel_regularizer=tf.keras.regularizers.l2(weight_reg))(evanet)
 
-sgd = tf.keras.optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+sgd = tf.keras.optimizers.SGD(lr=0.001, decay=0.0, momentum=0.9, nesterov=False)
 
 model = tf.keras.models.Model(inputs=a, outputs=evanet_out)
 model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['acc'])
