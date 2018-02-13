@@ -183,4 +183,4 @@ model.fit_generator(datagen.flow(X,Y, batch_size=batch_size),
                     steps_per_epoch=(len(X)//batch_size), epochs=num_epochs,
                     validation_data=valgen.flow(test_x, test_y),
                                             validation_steps=len(test_y))
-model.save("/PATH/TO/YOUR/MODELS/EvANet_model_"+num_epochs+"epochs.h5")
+model.save("/PATH/TO/YOUR/MODELS/EvANet_model_"+str(num_epochs)+"epochs.h5")
